@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32519.379
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxNet.ThrottleFirst", "src\RxNet.ThrottleFirst\RxNet.ThrottleFirst.csproj", "{EC9F946A-8392-4C36-8061-FF4C6B7FD167}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RxNet.ThrottleFirst.Tests", "tests\RxNet.ThrottleFirst.Tests\RxNet.ThrottleFirst.Tests.csproj", "{A092866A-B89C-42E9-A4F3-6A9441ECE775}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{25ED4039-5A17-4CA7-9061-300996C4BF7A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC9F946A-8392-4C36-8061-FF4C6B7FD167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9F946A-8392-4C36-8061-FF4C6B7FD167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9F946A-8392-4C36-8061-FF4C6B7FD167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9F946A-8392-4C36-8061-FF4C6B7FD167}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A092866A-B89C-42E9-A4F3-6A9441ECE775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A092866A-B89C-42E9-A4F3-6A9441ECE775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A092866A-B89C-42E9-A4F3-6A9441ECE775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A092866A-B89C-42E9-A4F3-6A9441ECE775}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3294942F-077C-4631-824C-884DBE2DAE08}
+	EndGlobalSection
+EndGlobal
