@@ -4,6 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+
     </PropertyGroup>
 
     <PropertyGroup>
@@ -16,8 +17,27 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'" >
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    </ItemGroup>
+
     <ItemGroup>
         <InternalsVisibleTo Include="$(AssemblyName).Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
     <ItemGroup>
