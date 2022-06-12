@@ -2,7 +2,7 @@
 
 Provides the `ThrottleFirst` filtering operator for Rx.Net.
 
-![](https://reactivex.io/documentation/operators/images/throttleFirst.png){height=250}
+![marble-throttlefirst](https://raw.githubusercontent.com/penenkel/Rx.ThrottleFirst/master/assets/throttleFirst.png)
 
 Given a source Observable and a suppression period TimeSpan: Emit the _first_ item from the source. Then skip subsequent items until the given period has elapsed. Then emit the next source item and start the suppression period anew.
 ```
@@ -34,16 +34,16 @@ Unfortunately there is significant disparity between the various reactive implem
 reactivex.io only lists and defines two of those operators directly: `sample` and `debounce`.  
 
 > `sample` emits the most recent item emitted by an Observable within periodic time intervals. This operator is sometimes also called `throttleLast`.
-![marble-sample](https://reactivex.io/documentation/operators/images/sample.png){height=250}
+![marble-sample](https://raw.githubusercontent.com/penenkel/Rx.ThrottleFirst/master/assets/sample.png)
 
 > `debounce` only emits an item from an Observable if a particular timespan has passed without it emitting another item. This operator is sometimes also called `throttleWithTimeout`.
-![marble-debounce](https://reactivex.io/documentation/operators/images/debounce.png){height=250}
+![marble-debounce](https://raw.githubusercontent.com/penenkel/Rx.ThrottleFirst/master/assets/debounce.png)
 
 
 But in addition to that, one the page for `sample`, they also define an operator named `throttleFirst`:
 
 > `throttleFirst` emits the first item and then skips items until the period elapses.
-![marble-throttlefirst](https://reactivex.io/documentation/operators/images/throttleFirst.png){height=250}
+![marble-throttlefirst](https://raw.githubusercontent.com/penenkel/Rx.ThrottleFirst/master/assets/throttleFirst.png)
 
 
 
