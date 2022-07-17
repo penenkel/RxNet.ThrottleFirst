@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive.Disposables;
+using System.Reactive.Linq;
 
 using Microsoft.Reactive.Testing;
 
@@ -19,6 +20,35 @@ namespace RxNet.ThrottleFirst.Tests
         public SanityCheck(ITestOutputHelper output)
         {
             _output = output;
+        }
+
+        [Fact]
+        public void TestableColdObservable_can_be_subscribed_multiple_times()
+        {
+            var scheduler = new TestScheduler();
+
+            var xs = scheduler.CreateColdObservable(
+                OnNext(200, 0),
+                OnCompleted<int>(300)
+            );
+
+            var obs1 = scheduler.CreateObserver<int>();
+            var obs2 = scheduler.CreateObserver<int>();
+            IDisposable? s1 = null;
+            IDisposable? s2 = null;
+
+            scheduler.ScheduleAbsolute<int>(default, 50, (s, state) => s1 = xs.AsObservable().Subscribe(obs1));
+            scheduler.ScheduleAbsolute<int>(default, 150, (s, state) => s2 = xs.AsObservable().Subscribe(obs2));
+
+            scheduler.ScheduleAbsolute<int>(default, 550, (s, state) => { s1?.Dispose(); return Disposable.Empty; });
+            scheduler.ScheduleAbsolute<int>(default, 550, (s, state) => { s2?.Dispose(); return Disposable.Empty; });
+
+            scheduler.Start();
+
+            xs.Subscriptions.AssertEqual(
+                Subscribe(50, 350),
+                Subscribe(150, 450)
+            );
         }
 
         [Fact]

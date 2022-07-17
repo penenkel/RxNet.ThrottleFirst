@@ -1,4 +1,4 @@
-using System.Reactive;
+﻿using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
@@ -202,7 +202,43 @@ public class ThrottleFirstTest : ReactiveTest
     }
 
     [Fact]
-    public void Dynamic_InnerEmptyWithoutCompletion()
+    public void Dynamic_InnerEmpty_InnerCompletingAfterOuter()
+    {
+        var scheduler = new TestScheduler();
+
+        var xs = scheduler.CreateHotObservable(
+            OnNext(100, 0), // publish
+            OnNext(200, 1), // skip, because timeout has not yet expired
+            OnNext(300, 2), // skip, because timeout has not yet expired
+            OnNext(400, 3), // skip, because timeout has not yet expired
+            OnCompleted<int>(500) // publish
+        );
+
+        var ys = scheduler.CreateColdObservable(
+            OnCompleted<int>(425)
+        );
+
+        var res = scheduler.Start(() =>
+            xs.ThrottleFirst(x => ys.AsObservable()),
+            0, 50, 550
+        );
+
+        res.Messages.AssertEqual(
+            OnNext(100, 0),
+            OnCompleted<int>(500)
+        );
+
+        xs.Subscriptions.AssertEqual(
+            Subscribe(50, 500)
+        );
+
+        ys.Subscriptions.AssertEqual(
+            Subscribe(100, 500) // ends early, simultaneously with outer
+        );
+    }
+
+    [Fact]
+    public void Dynamic_InnerEmpty_InnerWithoutCompletion()
     {
         var scheduler = new TestScheduler();
 
@@ -385,31 +421,74 @@ public class ThrottleFirstTest : ReactiveTest
     }
 
     [Fact]
-    public void SanityCheck_ColdObservable_can_be_subscribed_multiple_times()
+    public void Dynamic_OuterUnsubscribedEarly()
     {
         var scheduler = new TestScheduler();
 
-        var xs = scheduler.CreateColdObservable(
-            OnNext(200, 0),
-            OnCompleted<int>(300)
+        var xs = scheduler.CreateHotObservable(
+            OnNext(100, 0), // publish
+            OnNext(200, 1), // skip, because timeout has not yet expired
+            OnNext(300, 2), // publish
+            OnNext(400, 3), // skip, because timeout has not yet expired
+            OnCompleted<int>(500) // publish
         );
 
-        var obs1 = scheduler.CreateObserver<int>();
-        var obs2 = scheduler.CreateObserver<int>();
-        IDisposable? s1 = null;
-        IDisposable? s2 = null;
+        var ys = scheduler.CreateColdObservable(
+            OnNext(150, 42),
+            OnCompleted<int>(150)
+        );
 
-        scheduler.ScheduleAbsolute<int>(default, 50, (s, state) => s1 = xs.AsObservable().Subscribe(obs1));
-        scheduler.ScheduleAbsolute<int>(default, 150, (s, state) => s2 = xs.AsObservable().Subscribe(obs2));
+        var res = scheduler.Start(() =>
+            xs.ThrottleFirst(x => ys.AsObservable()),
+            0, 50, 250 // unsubscribe early
+        );
 
-        scheduler.ScheduleAbsolute<int>(default, 550, (s, state) => { s1?.Dispose(); return Disposable.Empty; });
-        scheduler.ScheduleAbsolute<int>(default, 550, (s, state) => { s2?.Dispose(); return Disposable.Empty; });
-
-        scheduler.Start();
+        res.Messages.AssertEqual(
+            OnNext(100, 0)
+        );
 
         xs.Subscriptions.AssertEqual(
-            Subscribe(50, 350),
-            Subscribe(150, 450)
+            Subscribe(50, 250) // ends early, due to outer being explicitly unsubscripted
+        );
+
+        ys.Subscriptions.AssertEqual(
+            Subscribe(100, 250) // ends early, due to outer being explicitly unsubscripted
+        );
+    }
+
+    [Fact]
+    public void Dynamic_OuterUnsubscribedEarly_InnerCompletingAfterOuter()
+    {
+        var scheduler = new TestScheduler();
+
+        var xs = scheduler.CreateHotObservable(
+            OnNext(100, 0), // publish
+            OnNext(200, 1), // skip, because timeout has not yet expired
+            OnNext(300, 2), // publish
+            OnNext(400, 3), // skip, because timeout has not yet expired
+            OnCompleted<int>(500) // publish
+        );
+
+        var ys = scheduler.CreateColdObservable(
+            OnNext(425, 42),
+            OnCompleted<int>(425)
+        );
+
+        var res = scheduler.Start(() =>
+            xs.ThrottleFirst(x => ys.AsObservable()),
+            0, 50, 250 // unsubscribe early
+        );
+
+        res.Messages.AssertEqual(
+            OnNext(100, 0)
+        );
+
+        xs.Subscriptions.AssertEqual(
+            Subscribe(50, 250) // ends early, due to outer being explicitly unsubscripted
+        );
+
+        ys.Subscriptions.AssertEqual(
+            Subscribe(100, 250) // ends early, due to outer being explicitly unsubscripted
         );
     }
 }
