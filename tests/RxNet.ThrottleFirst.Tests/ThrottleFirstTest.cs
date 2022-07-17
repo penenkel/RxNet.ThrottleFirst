@@ -1,25 +1,46 @@
-﻿using System.Reactive;
-using System.Reactive.Disposables;
+using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 
 using Microsoft.Reactive.Testing;
+
+using NFluent;
 
 namespace RxNet.ThrottleFirst.Tests;
 
 public class ThrottleFirstTest : ReactiveTest
 {
+    private static readonly TimeSpan NegativTimeSpan = TimeSpan.FromSeconds(-1);
+    private static readonly IObservable<int> NullObservable = null!;
+    private static readonly IScheduler NullScheduler = null!;
+    private static readonly string SchedulerNullExceptionMessage = "Value cannot be null. (Parameter 'scheduler')";
+    private static readonly IObservable<int> SomeObservable = Observable.Empty<int>();
+    private static readonly IScheduler SomeScheduler = new TestScheduler();
+    private static readonly TimeSpan SomeTimeSpan = TimeSpan.Zero;
+    private static readonly string SourceNullExceptionMessage = "Value cannot be null. (Parameter 'source')";
+    private static readonly string SuppressionPeriodNegativeExceptionMessage = "Cannot be negative. (Parameter 'suppressionPeriod')";
+    private static readonly string SuppressionPeriodSelectorNullExceptionMessage = "Value cannot be null. (Parameter 'suppressionPeriodSelector')";
+    private readonly Func<int, IObservable<string>> NullSuppressionPeriodSelector = null!;
+    private readonly Func<int, IObservable<string>> SomeSuppressionPeriodSelector = _ => DummyObservable<string>.Instance;
+
     [Fact]
     public void Constant_ArgumentChecking()
     {
-        var scheduler = new TestScheduler();
-        var someObservable = Observable.Empty<int>();
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(NullObservable!, SomeTimeSpan))
+            .Throws<ArgumentNullException>().WithMessage(SourceNullExceptionMessage);
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(SomeObservable, NegativTimeSpan))
+            .Throws<ArgumentOutOfRangeException>().WithMessage(SuppressionPeriodNegativeExceptionMessage);
+    }
 
-        ReactiveAssert.Throws<ArgumentNullException>(() => ThrottleFirstObservableExtensions.ThrottleFirst((IObservable<int>)null!, TimeSpan.Zero));
-        ReactiveAssert.Throws<ArgumentNullException>(() => ThrottleFirstObservableExtensions.ThrottleFirst(someObservable, TimeSpan.Zero, null!));
-        ReactiveAssert.Throws<ArgumentNullException>(() => ThrottleFirstObservableExtensions.ThrottleFirst((IObservable<int>)null!, TimeSpan.Zero, scheduler));
-
-        ReactiveAssert.Throws<ArgumentOutOfRangeException>(() => ThrottleFirstObservableExtensions.ThrottleFirst(someObservable, TimeSpan.FromSeconds(-1)));
-        ReactiveAssert.Throws<ArgumentOutOfRangeException>(() => ThrottleFirstObservableExtensions.ThrottleFirst(someObservable, TimeSpan.FromSeconds(-1), scheduler));
+    [Fact]
+    public void Constant_ArgumentChecking_WithScheduler()
+    {
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(NullObservable!, SomeTimeSpan, SomeScheduler))
+            .Throws<ArgumentNullException>().WithMessage(SourceNullExceptionMessage);
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(SomeObservable, SomeTimeSpan, NullScheduler!))
+            .Throws<ArgumentNullException>().WithMessage(SchedulerNullExceptionMessage);
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(SomeObservable, NegativTimeSpan, SomeScheduler))
+            .Throws<ArgumentOutOfRangeException>().WithMessage(SuppressionPeriodNegativeExceptionMessage);
     }
 
     [Fact]
@@ -60,10 +81,10 @@ public class ThrottleFirstTest : ReactiveTest
     [Fact]
     public void Dynamic_ArgumentChecking()
     {
-        var someObservable = DummyObservable<int>.Instance;
-
-        ReactiveAssert.Throws<ArgumentNullException>(() => ThrottleFirstObservableExtensions.ThrottleFirst((IObservable<int>)null!, x => someObservable));
-        ReactiveAssert.Throws<ArgumentNullException>(() => ThrottleFirstObservableExtensions.ThrottleFirst(someObservable, (Func<int, IObservable<string>>)null!));
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(NullObservable!, SomeSuppressionPeriodSelector))
+            .Throws<ArgumentNullException>().WithMessage(SourceNullExceptionMessage);
+        Check.ThatCode(() => ThrottleFirstObservableExtensions.ThrottleFirst(SomeObservable, NullSuppressionPeriodSelector))
+            .Throws<ArgumentNullException>().WithMessage(SuppressionPeriodSelectorNullExceptionMessage);
     }
 
     [Fact]
@@ -291,7 +312,7 @@ public class ThrottleFirstTest : ReactiveTest
     public void Dynamic_OuterError()
     {
         var scheduler = new TestScheduler();
-        Exception exception = new Exception();
+        Exception exception = new();
 
         var xs = scheduler.CreateHotObservable(
             OnNext(100, 0), // publish
@@ -329,7 +350,7 @@ public class ThrottleFirstTest : ReactiveTest
     public void Dynamic_OuterErrorBeforeInnerEmits()
     {
         var scheduler = new TestScheduler();
-        Exception exception = new Exception();
+        Exception exception = new();
 
         var xs = scheduler.CreateHotObservable(
             OnNext(100, 0), // publish
