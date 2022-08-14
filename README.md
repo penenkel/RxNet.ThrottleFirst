@@ -20,7 +20,7 @@ I recently needed an operator implementing the behavior as described in the prev
 
 There is an issue asking for such an operator [Implement a real throttle (not debounce, like the existing throttle)](https://github.com/dotnet/reactive/issues/395), but it has been closed citing that a) Rx.Net was there first and as such their naming shouldn't have to conform to others and b) the maintenance cost of yet an other operator.
 
-And while several "true" throttle variants where sketched in that thread, none included the selector variant and of cause there where no tests. Thus, the decision to create my own implementation including a though test suite.
+And while several "true" throttle variants where sketched in that thread, none included the selector variant and of cause there where no tests. Thus, the decision to create my own implementation including a thorough test suite.
 
 # Implementation
 
